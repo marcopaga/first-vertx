@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
+import static io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND;
 import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
 public class FirstVerticle extends AbstractVerticle {
@@ -44,6 +45,7 @@ public class FirstVerticle extends AbstractVerticle {
         router.get("/api/whiskies").handler(this::getAll);
         router.route("/api/whiskies*").handler(BodyHandler.create());
         router.post("/api/whiskies").handler(this::addOne);
+        router.get("/api/whiskies/:id").handler(this::getOne);
         router.delete("/api/whiskies/:id").handler(this::deleteOne);
 
         final Integer httpPort = config().getInteger("http.port", 8080);
@@ -58,6 +60,23 @@ public class FirstVerticle extends AbstractVerticle {
                         future.fail(event.cause());
                     }
                 });
+    }
+
+    private void getOne(RoutingContext routingContext) {
+        final Integer id = Integer.valueOf(routingContext.request().getParam("id"));
+        if(id == null){
+            routingContext.response().setStatusCode(NOT_FOUND.code()).end();
+        } else {
+            if(products.containsKey(id)) {
+                final Whisky whisky = products.get(id);
+                routingContext.response()
+                        .putHeader("content-type", "application/json; charset=utf-8")
+                        .end(Json.encodePrettily(whisky));
+            } else {
+                routingContext.response().setStatusCode(NOT_FOUND.code()).end();
+            }
+
+        }
     }
 
     private void deleteOne(RoutingContext routingContext) {
