@@ -6,8 +6,8 @@ import org.junit.Test;
 
 import static com.jayway.restassured.RestAssured.*;
 import static io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItems;
 
 public class Whisky_Api_ShouldIT {
 
@@ -27,8 +27,7 @@ public class Whisky_Api_ShouldIT {
         get("/api/whiskies").then()
                 .assertThat()
                 .statusCode(200)
-                .body(containsString("Bowmore 15 Years Laimrig"))
-                .body(containsString("Talisker 57° North"));
+                .body("name",hasItems("Bowmore 15 Years Laimrig", "Talisker 57° North"));
     }
 
     @Test
